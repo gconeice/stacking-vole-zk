@@ -35,6 +35,7 @@ add_test_case_with_run(arith circuit_scalability)
 add_test_case_with_run(arith polynomial)
 add_test_case_with_run(arith inner_prdt)
 add_test_case_with_run(arith matrix_mul)
+add_test_case_with_run(arith unstack_single_disj_matmul)
 add_test_case_with_run(arith sis)
 
 add_test_case_with_run(vole vole_triple)
