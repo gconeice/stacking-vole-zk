@@ -19,48 +19,75 @@ const int threads = 1;
 void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int branch_sz) {
 	long long test_n = matrix_sz * matrix_sz;
 
-	uint64_t *cr;
-	cr = new uint64_t[test_n * branch_sz];
-	for (int bid = 0; bid < branch_sz; bid++)
-		for (int i = 0; i < test_n; i++) {
-			cr[bid*test_n + i] = bid * matrix_sz;
-		}
+	uint64_t *res;
+	res = new uint64_t[test_n];
+	for (int i = 0; i < test_n; i++) res[i] = 0;
 
 	auto start = clock_start();
 
 	setup_zk_arith<BoolIO<NetIO>>(ios, threads, party);
 
-	IntFp *mat_a = new IntFp[test_n * branch_sz];
-	IntFp *mat_b = new IntFp[test_n * branch_sz];
-	IntFp *mat_c = new IntFp[test_n * branch_sz];
-	
-	for (int bid = 0; bid < branch_sz; bid++)
-		for(int i = 0; i < test_n; ++i) {
-			mat_a[bid*test_n + i] = IntFp(1, ALICE);
-			mat_b[bid*test_n + i] = IntFp(1, ALICE);
-			mat_c[i] = IntFp((uint64_t)0, PUBLIC);
-		}
 
-	for (int bid = 0; bid < branch_sz; bid++)
+	/*
+	IntFp x(12, ALICE);
+	IntFp y(13, ALICE);
+	IntFp z(156, ALICE);
+	__uint128_t delta = ZKFpExec::zk_exec->get_delta();
+
+	std::cout << "DELTA = " << LOW64(delta) << std::endl;
+
+	if (party==BOB) {
+		std::cout << add_mod(mult_mod(x.value, y.value), mult_mod(delta, z.value)) << std::endl;
+	} else {
+		std::cout << "X = " << LOW64(x.value) << ' ' << HIGH64(x.value) << std::endl;
+		std::cout << add_mod(z.value, add_mod(PR-mult_mod(x.value, HIGH64(y.value)), PR-mult_mod(y.value, HIGH64(x.value)))) << std::endl;
+		std::cout << mult_mod(x.value, y.value) << std::endl;
+	}
+	*/
+
+	IntFp *select_vec = new IntFp[branch_sz];
+
+	// Demux/mux vector
+	select_vec[0] = IntFp(1, ALICE);
+	for (int i = 1; i < branch_sz; i++) select_vec[i] = IntFp(0, ALICE);
+
+	IntFp *mat_a = new IntFp[test_n];
+	IntFp *mat_b = new IntFp[test_n];
+	IntFp *mat_c = new IntFp[test_n];
+
+	for (int i = 0; i < test_n; i++) {
+		mat_a[i] = IntFp(1, ALICE);
+		mat_b[i] = IntFp(1, ALICE);
+		mat_c[i] = IntFp(0, PUBLIC);
+	}
+
+	for (int bid = 0; bid < branch_sz; bid++) {
+		IntFp *tmp_mat_c = new IntFp[test_n];
+		for (int i = 0; i < test_n; i++) tmp_mat_c[i] = IntFp(add_mod(pr-(bid+1)*matrix_sz, 0), PUBLIC); // set the witness of branch i
+
+		// Matrix Multipilication
 		for(int i = 0; i < matrix_sz; ++i) {
 			for(int j = 0; j < matrix_sz; ++j) {
 				for(int k = 0; k < matrix_sz; ++k) {
-					IntFp tmp = mat_a[bid*test_n+i*matrix_sz+j] * mat_b[bid*test_n+j*matrix_sz+k];
-					mat_c[bid*test_n+i*matrix_sz+k] = mat_c[bid*test_n+i*matrix_sz+k] + tmp;
+					IntFp tmp = mat_a[i*matrix_sz+j] * mat_b[j*matrix_sz+k];
+					tmp_mat_c[i*matrix_sz+k] = tmp_mat_c[i*matrix_sz+k] + tmp;
 				}
 			}
 		}
 
-	batch_reveal_check(mat_c, cr, test_n*branch_sz);
-	auto timeuse = time_from(start);
+		// Mux		
+		for (int i = 0; i < matrix_sz; i++)
+			for (int j = 0; j < matrix_sz; j++) {
+				IntFp tmp = tmp_mat_c[i*matrix_sz+j] * select_vec[bid];
+				mat_c[i*matrix_sz+j] = mat_c[i*matrix_sz+j] + tmp;
+			}
+	}
+
+	batch_reveal_check(mat_c, res, test_n);	
 	finalize_zk_arith<BoolIO<NetIO>>();
+	auto timeuse = time_from(start);	
 	cout << matrix_sz << "\t" << timeuse << " us\t" << party << " " << endl;
 	std::cout << std::endl;
-
-	delete[] cr;
-	delete[] mat_a;
-	delete[] mat_b;
-	delete[] mat_c;
 
 
 #if defined(__linux__)

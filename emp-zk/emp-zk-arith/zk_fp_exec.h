@@ -33,6 +33,8 @@ public:
 	virtual __uint128_t mul_const_gate(const __uint128_t& a, const uint64_t& b) = 0;
 
 	virtual __uint128_t pub_label(const uint64_t&a) = 0;
+
+	virtual __uint128_t get_delta() = 0;
 };
 
 // ZKFpExec * ZKFpExec::zk_exec = nullptr;

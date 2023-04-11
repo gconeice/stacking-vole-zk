@@ -8,6 +8,10 @@ public:
 	FpOSTriple<IO> *ostriple;
 	IO* io = nullptr;
 
+	__uint128_t get_delta() {
+		return 0;
+	}
+
 	ZKFpExecPrv(IO** ios, int threads) : ZKFpExec() {
 		PRG prg(fix_key);
 		prg.random_block((block*)&this->pub_mac, 1);
