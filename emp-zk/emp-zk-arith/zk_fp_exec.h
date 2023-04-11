@@ -35,6 +35,10 @@ public:
 	virtual __uint128_t pub_label(const uint64_t&a) = 0;
 
 	virtual __uint128_t get_delta() = 0;
+
+	virtual void send_data(void *buf, const uint32_t size) = 0;
+
+	virtual void recv_data(void *buf, const uint32_t size) = 0;
 };
 
 // ZKFpExec * ZKFpExec::zk_exec = nullptr;

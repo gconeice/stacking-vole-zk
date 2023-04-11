@@ -12,6 +12,14 @@ public:
 		return 0;
 	}
 
+	void send_data(void *buf, const uint32_t size) {
+		io->send_data(buf, size);
+	}
+
+	void recv_data(void *buf, const uint32_t size) {
+		io->recv_data(buf, size);
+	}
+
 	ZKFpExecPrv(IO** ios, int threads) : ZKFpExec() {
 		PRG prg(fix_key);
 		prg.random_block((block*)&this->pub_mac, 1);

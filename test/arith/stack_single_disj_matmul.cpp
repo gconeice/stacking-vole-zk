@@ -18,6 +18,7 @@ const int threads = 1;
 
 void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int branch_sz) {
 	long long test_n = matrix_sz * matrix_sz;
+	long long mul_sz = matrix_sz * matrix_sz * matrix_sz;
 
 	uint64_t *res;
 	res = new uint64_t[test_n];
@@ -45,22 +46,36 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
 	}
 	*/
 
-	IntFp *select_vec = new IntFp[branch_sz];
-
-	// Demux/mux vector
-	select_vec[0] = IntFp(1, ALICE);
-	for (int i = 1; i < branch_sz; i++) select_vec[i] = IntFp(0, ALICE);
-
+	// Input
 	IntFp *mat_a = new IntFp[test_n];
 	IntFp *mat_b = new IntFp[test_n];
-	IntFp *mat_c = new IntFp[test_n];
-
 	for (int i = 0; i < test_n; i++) {
 		mat_a[i] = IntFp(1, ALICE);
 		mat_b[i] = IntFp(1, ALICE);
-		mat_c[i] = IntFp(0, PUBLIC);
 	}
 
+	// Left, Right, Output of MUL gates
+	IntFp *mul_le = new IntFp[mul_sz];
+	IntFp *mul_ri = new IntFp[mul_sz];
+	IntFp *mul_ou = new IntFp[mul_sz];
+	for (int i = 0; i < mul_sz; i++) {
+		mul_le[i] = IntFp(1, ALICE);
+		mul_ri[i] = IntFp(1, ALICE);
+		mul_ou[i] = mul_le[i] * mul_ri[i];
+	}
+
+	IntFp one = IntFp(1, PUBLIC);
+
+	if (party == ALICE) {
+		uint64_t xxx;
+		ZKFpExec::zk_exec->recv_data(&xxx, sizeof(uint64_t));
+		std::cout << "WOW " << xxx << std::endl;
+	} else {
+		uint64_t yyy = 12345;
+		ZKFpExec::zk_exec->send_data(&yyy, sizeof(uint64_t));		
+	}
+
+	/*
 	for (int bid = 0; bid < branch_sz; bid++) {
 		IntFp *tmp_mat_c = new IntFp[test_n];
 		for (int i = 0; i < test_n; i++) tmp_mat_c[i] = IntFp(add_mod(pr-(bid+1)*matrix_sz, 0), PUBLIC); // set the witness of branch i
@@ -81,20 +96,15 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
 				IntFp tmp = tmp_mat_c[i*matrix_sz+j] * select_vec[bid];
 				mat_c[i*matrix_sz+j] = mat_c[i*matrix_sz+j] + tmp;
 			}
-		delete[] tmp_mat_c;
 	}
+	*/
 
-	batch_reveal_check(mat_c, res, test_n);	
+	//batch_reveal_check(mat_c, res, test_n);	
 	finalize_zk_arith<BoolIO<NetIO>>();
 	auto timeuse = time_from(start);	
 	cout << matrix_sz << "\t" << timeuse << " us\t" << party << " " << endl;
 	std::cout << std::endl;
 
-	delete[] res;
-	delete[] mat_a;
-	delete[] mat_b;
-	delete[] mat_c;
-	delete[] select_vec;
 
 #if defined(__linux__)
 	struct rusage rusage;
