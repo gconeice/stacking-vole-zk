@@ -39,6 +39,7 @@ add_test_case_with_run(arith unstack_single_disj_matmul)
 add_test_case_with_run(arith stack_single_disj_matmul)
 add_test_case_with_run(arith stack_batched_matmul_v1)
 add_test_case_with_run(arith sis)
+add_test_case_with_run(arith try)
 
 add_test_case_with_run(vole vole_triple)
 add_test_case_with_run(vole cope)

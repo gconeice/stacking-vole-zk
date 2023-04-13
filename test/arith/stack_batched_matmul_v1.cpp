@@ -112,11 +112,90 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
         for (int i = 0; i < test_n; i++) left_vec_a[head] = add_mod(left_vec_a[head], mult_mod((bid+1)*matrix_sz, left_r[mul_sz*2 + i]));
     }
 
-    
-
     // Alice chooses active left vector to prove inner_product
     IntFp *left_v = new IntFp[w_length_batch_sz];
-    for (int i = 0; i < w_length_batch_sz; i++) left_v[i] = IntFp(1, ALICE);
+    for (int bid = 0; bid < batch_sz; bid++) 
+        for (int i = 0; i < w_length; i++) 
+            left_v[bid*w_length + i] = IntFp(left_vec_a[i], ALICE);
+
+    
+    // Alice proves the inner products are 0
+	if (party == ALICE) {
+		uint64_t chi; // random challenge
+		ZKFpExec::zk_exec->recv_data(&chi, sizeof(uint64_t));
+        uint64_t coeff = 1;
+        uint64_t C0 = 0, C1 = 0;
+
+        for (int bid = 0; bid < batch_sz; bid++) {
+            uint64_t tmp0 = 0;
+            uint64_t tmp1 = 0;
+            // mat_a
+            for (int i = 0; i < test_n; i++) {
+                tmp0 = add_mod(tmp0, mult_mod(mat_a[i].value, left_v[bid*w_length + i].value));
+                tmp1 = add_mod(tmp1, add_mod(mult_mod(HIGH64(mat_a[i].value), left_v[bid*w_length + i].value), mult_mod(mat_a[i].value, HIGH64(left_v[bid*w_length + i].value))));
+            }
+            // mat_b
+            for (int i = 0; i < test_n; i++) {
+                tmp0 = add_mod(tmp0, mult_mod(mat_b[i].value, left_v[bid*w_length + test_n + i].value));
+                tmp1 = add_mod(tmp1, add_mod(mult_mod(HIGH64(mat_b[i].value), left_v[bid*w_length + test_n + i].value), mult_mod(mat_b[i].value, HIGH64(left_v[bid*w_length + test_n + i].value))));
+            }
+            // mul_le
+            for (int i = 0; i < mul_sz; i++) {
+                tmp0 = add_mod(tmp0, mult_mod(mul_le[i].value, left_v[bid*w_length + 2*test_n + i].value));
+                tmp1 = add_mod(tmp1, add_mod(mult_mod(HIGH64(mul_le[i].value), left_v[bid*w_length + 2*test_n + i].value), mult_mod(mul_le[i].value, HIGH64(left_v[bid*w_length + 2*test_n + i].value))));
+            }
+            // mul_ri
+            for (int i = 0; i < mul_sz; i++) {
+                tmp0 = add_mod(tmp0, mult_mod(mul_ri[i].value, left_v[bid*w_length + 2*test_n + mul_sz + i].value));
+                tmp1 = add_mod(tmp1, add_mod(mult_mod(HIGH64(mul_ri[i].value), left_v[bid*w_length + 2*test_n + mul_sz + i].value), mult_mod(mul_ri[i].value, HIGH64(left_v[bid*w_length + 2*test_n + mul_sz + i].value))));
+            }
+            // mul_ou
+            for (int i = 0; i < mul_sz; i++) {
+                tmp0 = add_mod(tmp0, mult_mod(mul_ou[i].value, left_v[bid*w_length + 2*test_n + 2*mul_sz + i].value));
+                tmp1 = add_mod(tmp1, add_mod(mult_mod(HIGH64(mul_ou[i].value), left_v[bid*w_length + 2*test_n + 2*mul_sz + i].value), mult_mod(mul_ou[i].value, HIGH64(left_v[bid*w_length + 2*test_n + 2*mul_sz + i].value))));
+            }
+            // constant term
+            tmp0 = add_mod(tmp0, mult_mod(one.value, left_v[bid*w_length + 2*test_n + 3*mul_sz].value));
+            tmp1 = add_mod(tmp1, add_mod(mult_mod(HIGH64(one.value), left_v[bid*w_length + 2*test_n + 3*mul_sz].value), mult_mod(one.value, HIGH64(left_v[bid*w_length + 2*test_n + 3*mul_sz].value))));
+            C0 = add_mod(C0, mult_mod(tmp0, coeff));
+            C1 = add_mod(C1, mult_mod(tmp1, coeff));
+            coeff = mult_mod(coeff, chi);
+        }        
+
+        C1 = PR - C1;
+        std::cout << "C0 = " << C0 << std::endl;
+        std::cout << "C1 = " << C1 << std::endl;
+
+    } else {
+		uint64_t chi; // random challenge
+		PRG().random_data(&chi, sizeof(uint64_t));
+		chi = chi % PR;
+		ZKFpExec::zk_exec->send_data(&chi, sizeof(uint64_t));	
+        uint64_t coeff = 1;
+        uint64_t expect_value = 0;
+
+        for (int bid = 0; bid < batch_sz; bid++) {
+            uint64_t tmp = 0;
+            // mat_a
+            for (int i = 0; i < test_n; i++) tmp = add_mod(tmp, mult_mod(mat_a[i].value, left_v[bid*w_length + i].value));
+            // mat_b
+            for (int i = 0; i < test_n; i++) tmp = add_mod(tmp, mult_mod(mat_b[i].value, left_v[bid*w_length + test_n + i].value));
+            // mul_le
+            for (int i = 0; i < mul_sz; i++) tmp = add_mod(tmp, mult_mod(mul_le[i].value, left_v[bid*w_length + 2*test_n + i].value));
+            // mul_ri
+            for (int i = 0; i < mul_sz; i++) tmp = add_mod(tmp, mult_mod(mul_ri[i].value, left_v[bid*w_length + 2*test_n + mul_sz + i].value));
+            // mul_ou
+            for (int i = 0; i < mul_sz; i++) tmp = add_mod(tmp, mult_mod(mul_ou[i].value, left_v[bid*w_length + 2*test_n + 2*mul_sz + i].value));
+            // constant term
+            tmp = add_mod(tmp, mult_mod(one.value, left_v[bid*w_length + 2*test_n + 3*mul_sz].value));
+            expect_value = add_mod(expect_value, mult_mod(tmp, coeff));
+            coeff = mult_mod(coeff, chi);
+        }
+
+        std::cout << "DELTA = " << delta << std::endl;
+        std::cout << "EV = " << expect_value << std::endl;
+
+    }    
 
 	finalize_zk_arith<BoolIO<NetIO>>();
 	auto timeuse = time_from(start);	
