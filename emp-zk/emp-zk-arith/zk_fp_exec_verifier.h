@@ -21,6 +21,11 @@ public:
 		io->recv_data(buf, size);
 	}	
 
+	void flush_and_proofs() {
+		if(ostriple->andgate_buf_not_empty())
+			ostriple->andgate_correctness_check_manage();
+	}
+
 	ZKFpExecVer(IO** ios, int threads) : ZKFpExec() {
 		PRG prg(fix_key);
 		prg.random_block((block*)&this->pub_mac, 1);
