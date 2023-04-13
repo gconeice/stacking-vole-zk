@@ -15,6 +15,7 @@ using namespace std;
 
 int port, party;
 const int threads = 1;
+// #define HVZK
 
 
 inline uint64_t calculate_hash(PRP &prp, uint64_t x) {
@@ -27,11 +28,10 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
 	long long test_n = matrix_sz * matrix_sz;
 	long long mul_sz = matrix_sz * matrix_sz * matrix_sz;
 
+	/*
 	uint64_t *res;
 	res = new uint64_t[test_n];
 	for (int i = 0; i < test_n; i++) res[i] = 0;
-
-	/*
 	// checking algo
 	uint64_t *a;
 	uint64_t *b;
