@@ -16,6 +16,8 @@ using namespace std;
 int port, party;
 const int threads = 1;
 
+#define TRY
+
 inline uint64_t calculate_hash(PRP &prp, uint64_t x) {
 	block bk = makeBlock(0, x);
 	prp.permute_block(&bk, 1);
@@ -32,30 +34,60 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
     long long w_length_branch_sz = w_length * branch_sz;
     long long check_length = mul_sz * 2 + test_n;
 
-	IntFp *mat_a = new IntFp[test_n_batch_sz];
-	IntFp *mat_b = new IntFp[test_n_batch_sz];
-	IntFp *mul_le = new IntFp[mul_sz_batch_sz];
-	IntFp *mul_ri = new IntFp[mul_sz_batch_sz];
-	IntFp *mul_ou = new IntFp[mul_sz_batch_sz];
-
 	auto start = clock_start();
 
 	setup_zk_arith<BoolIO<NetIO>>(ios, threads, party);
 
+#ifndef TRY
+    uint64_t res = 0;
 	// Input
-	for (int i = 0; i < test_n_batch_sz; i++) mat_a[i] = IntFp(1, ALICE);
-	for (int i = 0; i < test_n_batch_sz; i++) mat_b[i] = IntFp(1, ALICE);
+	IntFp *mat_a = new IntFp[test_n_batch_sz];
+	IntFp *mat_b = new IntFp[test_n_batch_sz];
+	for (int i = 0; i < test_n_batch_sz; i++) {
+		mat_a[i] = IntFp(0, ALICE);
+        res = add_mod(res, mat_a[i].value);
+		mat_b[i] = IntFp(0, ALICE);
+        res = add_mod(res, mat_b[i].value);
+	}
 
 	// Left, Right, Output of MUL gates
-	for (int i = 0; i < mul_sz_batch_sz; i++) mul_le[i] = IntFp(1, ALICE);
-	for (int i = 0; i < mul_sz_batch_sz; i++) mul_ri[i] = IntFp(1, ALICE);
-    for (int i = 0; i < mul_sz_batch_sz; i++)
+	IntFp *mul_le = new IntFp[mul_sz_batch_sz];
+	IntFp *mul_ri = new IntFp[mul_sz_batch_sz];
+	IntFp *mul_ou = new IntFp[mul_sz_batch_sz];
+	for (int i = 0; i < mul_sz_batch_sz; i++) {
+		mul_le[i] = IntFp(0, ALICE);
+        res = add_mod(res, mul_le[i].value);
+		mul_ri[i] = IntFp(0, ALICE);
+        res = add_mod(res, mul_ri[i].value);
 		mul_ou[i] = mul_le[i] * mul_ri[i];
+        res = add_mod(res, mul_ou[i].value);
+	}
 	ZKFpExec::zk_exec->flush_and_proofs();
 
+    std::cout << "RES = " << res << std::endl;
 	// Unit for constant offsets
 	IntFp one = IntFp(1, PUBLIC);
 	uint64_t delta = ZKFpExec::zk_exec->get_delta();
+#endif
+#ifdef TRY
+    uint64_t res = 0;
+    IntFp tmp, x, y, z;
+    for (int i = 0; i < test_n_batch_sz; i++) {
+        tmp = IntFp(0, ALICE);
+        res = add_mod(res, tmp.value);
+        tmp = IntFp(0, ALICE);
+        res = add_mod(res, tmp.value);
+    }
+    for (int i = 0; i < mul_sz_batch_sz; i++) {
+        x = IntFp(0, ALICE);
+        res = add_mod(res, x.value);
+        y = IntFp(0, ALICE);
+        res = add_mod(res, y.value);
+        z = x * y;
+        res = add_mod(res, z.value);        
+    }
+    std::cout << "RES = " << res << std::endl;
+#endif
 
 	finalize_zk_arith<BoolIO<NetIO>>();
 	auto timeuse = time_from(start);	

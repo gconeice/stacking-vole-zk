@@ -14,6 +14,7 @@ public:
 
 	void send_data(void *buf, const uint32_t size) {
 		io->send_data(buf, size);
+		io->flush();
 	}
 
 	void recv_data(void *buf, const uint32_t size) {
@@ -23,6 +24,12 @@ public:
 	void flush_and_proofs() {
 		if(ostriple->andgate_buf_not_empty())
 			ostriple->andgate_correctness_check_manage();
+	}
+
+	__uint128_t get_one_role() {
+		__uint128_t mac;
+		ostriple->vole->extend(&mac, 1);
+		return mac;		
 	}
 
 	ZKFpExecPrv(IO** ios, int threads) : ZKFpExec() {

@@ -32,6 +32,9 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
     long long w_length_branch_sz = w_length * branch_sz;
     long long check_length = mul_sz * 2 + test_n;
 
+    uint64_t *res = new uint64_t[batch_sz];
+    for (int i = 0; i < batch_sz; i++) res[i] = 0;
+
 	auto start = clock_start();
 
 	setup_zk_arith<BoolIO<NetIO>>(ios, threads, party);
@@ -54,6 +57,11 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
 		mul_ou[i] = mul_le[i] * mul_ri[i];
 	}
 	ZKFpExec::zk_exec->flush_and_proofs();
+
+    // debug information
+    std::cout << "ACCEPT Multiplication Proofs!" << std::endl;
+    cout << time_from(start) << " us\t" << party << " " << endl;
+	std::cout << std::endl;    
 
 	// Unit for constant offsets
 	IntFp one = IntFp(1, PUBLIC);
@@ -112,6 +120,10 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
         for (int i = 0; i < test_n; i++) left_vec_a[head] = add_mod(left_vec_a[head], mult_mod((bid+1)*matrix_sz, left_r[mul_sz*2 + i]));
     }
 
+    std::cout << "Calculated Left Vectors!" << std::endl;    
+    cout << time_from(start) << " us\t" << party << " " << endl;
+	std::cout << std::endl;
+
     // Alice chooses active left vector to prove inner_product
     IntFp *left_v = new IntFp[w_length_batch_sz];
     for (int bid = 0; bid < batch_sz; bid++) 
@@ -162,10 +174,14 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
             coeff = mult_mod(coeff, chi);
         }        
 
+        // mask the proofs with random_mask
+        __uint128_t random_mask = ZKFpExec::zk_exec->get_one_role();
+        C1 = add_mod(C1, HIGH64(random_mask));
         C1 = PR - C1;
-        std::cout << "C0 = " << C0 << std::endl;
-        std::cout << "C1 = " << C1 << std::endl;
+        C0 = add_mod(C0, LOW64(random_mask));
 
+        ZKFpExec::zk_exec->send_data(&C0, sizeof(uint64_t));
+        ZKFpExec::zk_exec->send_data(&C1, sizeof(uint64_t));
     } else {
 		uint64_t chi; // random challenge
 		PRG().random_data(&chi, sizeof(uint64_t));
@@ -192,10 +208,75 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
             coeff = mult_mod(coeff, chi);
         }
 
-        std::cout << "DELTA = " << delta << std::endl;
-        std::cout << "EV = " << expect_value << std::endl;
+        // mask the proofs with random_mask
+        __uint128_t random_mask = ZKFpExec::zk_exec->get_one_role();
+        expect_value = add_mod(expect_value, LOW64(random_mask));
 
+        uint64_t C0, C1;
+        ZKFpExec::zk_exec->recv_data(&C0, sizeof(uint64_t));
+        ZKFpExec::zk_exec->recv_data(&C1, sizeof(uint64_t));
+
+        uint64_t proof_value = add_mod(C0, mult_mod(C1, delta));
+
+        if (proof_value != expect_value) error("Prover cheat!");
+     
+    }
+
+    std::cout << "ACCEPT Inner-Product Proofs" << std::endl;    
+    cout << time_from(start) << " us\t" << party << " " << endl;
+	std::cout << std::endl;
+
+    // Generates MACs
+    // getting the seeds on the right-hand-side
+    block right_s_seed; 
+    if (party == ALICE) {
+		ZKFpExec::zk_exec->recv_data(&right_s_seed, sizeof(block));
+    } else {
+        PRG().random_block(&right_s_seed, 1);
+        ZKFpExec::zk_exec->send_data(&right_s_seed, sizeof(block));
+    }
+    PRG prg_right_s(&right_s_seed);
+    uint64_t *right_s = new uint64_t[w_length];
+    for (int i = 0; i < w_length; i++) {
+        block tmp;
+        prg_right_s.random_block(&tmp, 1);
+        right_s[i] = LOW64(tmp) % PR;
     }    
+    // Calculate MACs
+    uint64_t *mac = new uint64_t[branch_sz];    
+    for (int bid = 0; bid < branch_sz; bid++) {
+        mac[bid] = 0;
+        for (int i = 0; i < w_length; i++) mac[bid] = add_mod(mac[bid], mult_mod(right_s[i], left_vec_a[bid*w_length + i]));
+    }
+
+    std::cout << "mac Generated" << std::endl;    
+    cout << time_from(start) << " us\t" << party << " " << endl;
+	std::cout << std::endl;
+
+    // Generates [MAC]s
+    IntFp *MAC = new IntFp[batch_sz];
+    for (int bid = 0; bid < batch_sz; bid++) {
+        MAC[bid] = IntFp(0, PUBLIC);
+        for (int i = 0; i < w_length; i++) MAC[bid] = MAC[bid] + left_v[bid*w_length + i] * right_s[i];
+    }
+
+    std::cout << "[mac] Generated" << std::endl;    
+    cout << time_from(start) << " us\t" << party << " " << endl;
+	std::cout << std::endl;
+
+    // f([MAC])=0 Proofs
+    IntFp *f_mac = new IntFp[batch_sz];
+    for (int bid = 0; bid < batch_sz; bid++) {
+        f_mac[bid] = IntFp(1, PUBLIC);
+        for (int br = 0; br < branch_sz; br++) {
+			IntFp term = MAC[bid] + IntFp(mac[br], PUBLIC).negate();
+			f_mac[bid] = f_mac[bid] * term;
+		}
+    }
+    batch_reveal_check(f_mac, res, batch_sz);
+    std::cout << "ACCEPT Mac Proofs" << std::endl;    
+    cout << time_from(start) << " us\t" << party << " " << endl;
+	std::cout << std::endl;    
 
 	finalize_zk_arith<BoolIO<NetIO>>();
 	auto timeuse = time_from(start);	
