@@ -130,6 +130,9 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
         for (int i = 0; i < w_length; i++) 
             left_v[bid*w_length + i] = IntFp(left_vec_a[i], ALICE);
 
+    std::cout << "Committed left compressed a!" << std::endl;    
+    cout << time_from(start) << " us\t" << party << " " << endl;
+	std::cout << std::endl;            
     
     // Alice proves the inner products are 0
 	if (party == ALICE) {
