@@ -44,10 +44,11 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
 				res[i*matrix_sz+k] = add_mod(res[i*matrix_sz+k], mult_mod(a[i*matrix_sz+j], b[j*matrix_sz+k]));
 	*/
 	
-	auto start = clock_start();
 
 	setup_zk_arith<BoolIO<NetIO>>(ios, threads, party);
+    ZKFpExec::zk_exec->get_one_role();
 
+	auto start = clock_start();
 
 	/*
 	IntFp x(12, ALICE);

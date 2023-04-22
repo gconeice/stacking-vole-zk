@@ -23,9 +23,12 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
 	res = new uint64_t[test_n];
 	for (int i = 0; i < test_n; i++) res[i] = 0;
 
-	auto start = clock_start();
 
 	setup_zk_arith<BoolIO<NetIO>>(ios, threads, party);
+    ZKFpExec::zk_exec->get_one_role();
+
+
+	auto start = clock_start();
 
 	/*
 	IntFp x(12, ALICE);

@@ -15,40 +15,16 @@ macro (add_test_case_with_run folder _name)
 
 endmacro()
 
-# Test cases
-add_test_case_with_run(bool example)
-add_test_case_with_run(bool ostriple)
-add_test_case_with_run(bool bool_io)
-add_test_case_with_run(bool memory_scalability)
-add_test_case_with_run(bool input_scalability)
-add_test_case_with_run(bool circuit_scalability)
-add_test_case_with_run(bool sha256)
-add_test_case_with_run(bool polynomial)
-add_test_case_with_run(bool inner_prdt)
-add_test_case_with_run(bool lowmc)
-
-add_test_case_with_run(arith abconversion)
-add_test_case_with_run(arith zk_proof)
-add_test_case_with_run(arith ostriple)
-add_test_case_with_run(arith input_scalability)
-add_test_case_with_run(arith circuit_scalability)
-add_test_case_with_run(arith polynomial)
-add_test_case_with_run(arith inner_prdt)
-add_test_case_with_run(arith matrix_mul)
+# Test Single Stack
 add_test_case_with_run(arith unstack_single_disj_matmul)
-add_test_case_with_run(arith unstack_batched_disj_matmul)
 add_test_case_with_run(arith stack_single_disj_matmul)
-add_test_case_with_run(arith stack_single_disj_matmul_v2)
+
+# Test Single Stack Online
+add_test_case_with_run(arith unstack_single_disj_matmul_online)
+add_test_case_with_run(arith stack_single_disj_matmul_online)
+
+
+# Test Batched Stack
+add_test_case_with_run(arith unstack_batched_disj_matmul)
 add_test_case_with_run(arith stack_multi_single_disj_matmul)
 add_test_case_with_run(arith stack_batched_matmul_v1)
-add_test_case_with_run(arith sis)
-add_test_case_with_run(arith try)
-
-add_test_case_with_run(vole vole_triple)
-add_test_case_with_run(vole cope)
-add_test_case_with_run(vole base_svole)
-add_test_case_with_run(vole lpn)
-
-add_test_case_with_run(ram ram_test)
-add_test_case_with_run(ram ram_ext_test)
-add_test_case_with_run(ram ro_ram_test)
