@@ -38,6 +38,23 @@ public:
 		if(buffer1 != nullptr) delete[] buffer1;
 	}
 
+	void get_ope(block &authen, block &value) {
+		block ope_data[128];
+		ferret->rcot(ope_data, 128);
+		block tmp;
+		pack.packing(&tmp, ope_data);
+		uint64_t choice_bits[2];
+		for(int i = 0; i < 2; ++i) {
+			choice_bits[i] = 0;
+			for(int j = 63; j >= 0; --j) {
+				choice_bits[i] <<= 1;
+				if(getLSB(ope_data[i*64+j])) choice_bits[i] |= 0x1;
+			}
+		}		
+		authen = tmp;
+		value = makeBlock(choice_bits[1], choice_bits[0]);
+	}
+
 	void batch_check() {
 		if(num == 0) return;
 

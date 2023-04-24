@@ -67,6 +67,11 @@ inline void zkp_inner_prdt_multi(Integer *x, Integer *y, Bit *r, Bit * s, int le
 	((ZKBoolCircExec<IO>*)(CircuitExecution::circ_exec))->polyproof->zkp_inner_prdt_multi(x, y, r, s, len, width);
 }
 
+template<typename IO>
+inline void zkp_get_ope(block &authen, block &value) {
+	((ZKBoolCircExec<IO>*)(CircuitExecution::circ_exec))->polyproof->get_ope(authen, value);
+}
+
 
 }
 #endif

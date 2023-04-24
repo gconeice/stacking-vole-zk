@@ -15,6 +15,10 @@ macro (add_test_case_with_run folder _name)
 
 endmacro()
 
+# Test Boolean Stack
+add_test_case_with_run(bool mat_mul)
+add_test_case_with_run(bool stack_mat_mul)
+
 # Test Single Stack
 add_test_case_with_run(arith unstack_single_disj_matmul)
 add_test_case_with_run(arith stack_single_disj_matmul)
