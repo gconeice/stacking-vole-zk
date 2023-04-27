@@ -141,7 +141,6 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int rep_sz, int bra
 	
 	auto start = clock_start();
 
-    
     for (int i = 0; i < input_size0+input_size1; i++) in[i] = Bit(false, ALICE);    
     for (int i = 0; i < and_gate_per_cir * rep_sz; i++) {
         l[i] = Bit(lvalue[i], ALICE);
@@ -188,7 +187,7 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int rep_sz, int bra
     }
     //delete[] chis;
 
-    //for (int i = 0; i < branch_sz; i++) cout << HIGH64(proofs[i]) << ' ' << LOW64(proofs[i]) << ' ' << HIGH64(values[i]) << ' ' << LOW64(values[i]) << std::endl;
+    // for (int i = 0; i < branch_sz; i++) cout << HIGH64(proofs[i]) << ' ' << LOW64(proofs[i]) << ' ' << HIGH64(values[i]) << ' ' << LOW64(values[i]) << std::endl;
     // final proof
 
     block aut[branch_sz], val[branch_sz];
@@ -317,12 +316,12 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int rep_sz, int bra
         tmp = tmp ^ A0;
 
         if (HIGH64(tmp) == HIGH64(accum) && LOW64(tmp) == LOW64(accum)) cout << "FINAL LPZK SUCCESS" << endl;
-        else exit(-1);
+        else error("cheated\n");
 
         // final 0 check
         ios[0]->recv_data(&tmp, sizeof(block));
         if (HIGH64(tmp) == HIGH64(aut[branch_sz-2]) && LOW64(tmp) == LOW64(aut[branch_sz-2])) cout << "FINAL 0 SUCCESS" << endl;
-        else exit(-1);
+        else error("cheated\n");
     }
     
 

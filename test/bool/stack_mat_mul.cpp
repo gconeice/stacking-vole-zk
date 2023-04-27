@@ -15,10 +15,16 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
 	long long mul_sz = matrix_sz * matrix_sz * matrix_sz;
 
 	setup_zk_bool<BoolIO<NetIO>>(ios, threads, party);
-	auto start = clock_start();
 
+    block *chis = new block[mul_sz*2+test_n];
 	Bit *mat_a = new Bit[test_n];
 	Bit *mat_b = new Bit[test_n];
+	Bit *mul_le = new Bit[mul_sz];
+	Bit *mul_ri = new Bit[mul_sz];
+	Bit *mul_ou = new Bit[mul_sz];
+
+	auto start = clock_start();
+
 
 	// Input
 	for (int i = 0; i < test_n; i++) {
@@ -27,9 +33,6 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
 	}
 
 	// Left, Right, Output of AND gates
-	Bit *mul_le = new Bit[mul_sz];
-	Bit *mul_ri = new Bit[mul_sz];
-	Bit *mul_ou = new Bit[mul_sz];
 	for (int i = 0; i < mul_sz; i++) {
 		mul_le[i] = Bit(true, ALICE);
 		mul_ri[i] = Bit(true, ALICE);
@@ -54,7 +57,7 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
         ios[0]->recv_data(&tmp2, sizeof(uint64_t));
         chi = makeBlock(tmp1, tmp2);
 
-        block *chis = new block[mul_sz*2+test_n];
+        //block *chis = new block[mul_sz*2+test_n];
         chis[0] = makeBlock(0, 1);
         for (int i = 1; i < mul_sz*2 + test_n; i++) gfmul(chis[i-1], chi, &chis[i]);
 
@@ -129,7 +132,7 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
 				}							
 		}
 
-        delete[] chis;		
+        //delete[] chis;		
 
 	} else {
 
@@ -142,7 +145,7 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
         ios[0]->flush();
         chi = makeBlock(tmp1, tmp2);
 
-        block *chis = new block[mul_sz*2+test_n];
+        
         chis[0] = makeBlock(0, 1);
         for (int i = 1; i < mul_sz*2 + test_n; i++) gfmul(chis[i-1], chi, &chis[i]);
 		
@@ -203,7 +206,7 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
                     coe_id++;
 				}							
 		}
-        delete[] chis;
+        //delete[] chis;
 	}	
 
     // final proof
@@ -336,12 +339,12 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
         tmp = tmp ^ A0;
 
         if (HIGH64(tmp) == HIGH64(accum) && LOW64(tmp) == LOW64(accum)) cout << "FINAL LPZK SUCCESS" << endl;
-        else exit(-1);
+        else error("cheated\n");
 
         // final 0 check
         ios[0]->recv_data(&tmp, sizeof(block));
         if (HIGH64(tmp) == HIGH64(aut[branch_sz-2]) && LOW64(tmp) == LOW64(aut[branch_sz-2])) cout << "FINAL 0 SUCCESS" << endl;
-        else exit(-1);
+        else error("cheated\n");
 
     }
 
