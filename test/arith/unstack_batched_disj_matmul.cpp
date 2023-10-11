@@ -112,10 +112,16 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
 }
 
 int main(int argc, char** argv) {
+
+	if(argc < 7) {
+		std::cout << "usage: a.out PARTY PORT IP DIMENSION #BRANCH #REPETITION" << std::endl;
+		return -1;
+	}
+	
 	parse_party_and_port(argv, &party, &port);
 	BoolIO<NetIO>* ios[threads];
 	for(int i = 0; i < threads; ++i)
-		ios[i] = new BoolIO<NetIO>(new NetIO(party == ALICE?nullptr:"127.0.0.1",port+i), party==ALICE);
+		ios[i] = new BoolIO<NetIO>(new NetIO(party == ALICE?nullptr:argv[3],port+i), party==ALICE);
 
 	std::cout << std::endl << "------------ circuit zero-knowledge proof test ------------" << std::endl << std::endl;;
 
@@ -130,9 +136,9 @@ int main(int argc, char** argv) {
 		branch = 10;
         batch = 0;
 	} else {
-		num = atoi(argv[3]);
-		branch = atoi(argv[4]);
-        batch = atoi(argv[5]);
+		num = atoi(argv[4]);
+		branch = atoi(argv[5]);
+        batch = atoi(argv[6]);
 	}
 	
 
