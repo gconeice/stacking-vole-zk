@@ -26,8 +26,7 @@ You can simply use `sudo bash setup.sh`. Or,
 Build
 =====
 0. `sudo apt install -y emacs iperf iftop`
-1. `mkdir build && cd build && cmake ../ && make`
-2. `cd build && cp ../sha256.txt ./`
+1. `mkdir build && cd build && cmake ../ && make && cp ../sha256.txt ./`
 
 We test above methods already on a vanilla Ubuntu 22.04 machine.
 
