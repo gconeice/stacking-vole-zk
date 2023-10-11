@@ -1,11 +1,15 @@
 # Disjunction and Batched Disjunction for VOLE-based Zero Knowledge
 
+This is the artifact for the paper: **Batchman and Robin:
+Batched and Non-batched Branching for Interactive ZK** to be presented on ACM CCS 2023.
+
+Eprint link: https://eprint.iacr.org/2023/1257
+
 Base
 =====
 We acknowledge that our protocols based on QuickSilver repo available at: https://github.com/emp-toolkit/emp-zk.
-In particular, we folk the repo and develop based on it.
-We also tweat some emp libraries.
-We will further clarify and obey the license in their repo if we open source.
+In particular, we fork the repo and develop based on it.
+We also tweak some emp libraries.
 
 Installation EMP libraries
 =====
@@ -17,6 +21,7 @@ Installation EMP libraries
 Build
 =====
 1. `mkdir build && cd build && cmake ../ && make`
+2. `cd build && cp ../sha256.txt ./`
 
 Test
 =====
@@ -25,7 +30,7 @@ We have the following tests:
    1. bool_stack_mat_mul_RO: Boolean matrix multiplications, RO version.
    2. bool_stack_mat_mul: Boolean matrix multiplications, Lemma 5.4 version.
    3. bool_stack_sha256_RO: Repeating SHA2, RO version.
-   4. bool_stack_sah256: Repeating SHA2, Lemma 5.4 version.
+   4. bool_stack_sha256: Repeating SHA2, Lemma 5.4 version.
 
 2. Arithmetic single disjunction:
    1. arith_stack_single_disj_matmul: Arithmetic matrix multiplications, Lemma 5.4 version.
