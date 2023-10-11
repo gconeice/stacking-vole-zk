@@ -55,7 +55,7 @@ We have the following tests:
 
 4. Arithmetic baseline QuickSilver:
    1. arith_unstack_single_disj_matmul: Arithmetic matrix multiplications, single disjunction, QuickSilver.
-   2. arith_unstack_single_disj_matmul: Arithmetic matrix multiplications, single disjunction, QuickSilver, online cost only.
+   2. arith_unstack_single_disj_matmul_online: Arithmetic matrix multiplications, single disjunction, QuickSilver, online cost only.
    3. arith_unstack_batched_disj_matmul: Arithmetic matrix multiplications, batched disjunction, QuickSilver.
 
 5. Repeating single disjunction:
