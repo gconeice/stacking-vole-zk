@@ -11,6 +11,8 @@ We acknowledge that our protocols based on QuickSilver repo available at: https:
 In particular, we fork the repo and develop based on it.
 We also tweak some emp libraries.
 
+The file `sha256.txt` is obtained from https://homes.esat.kuleuven.be/~nsmart/MPC.
+
 Installation EMP libraries
 =====
 1. `wget https://raw.githubusercontent.com/emp-toolkit/emp-readme/master/scripts/install.py`
