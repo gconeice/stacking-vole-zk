@@ -346,15 +346,15 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int rep_sz, int bra
 
 int main(int argc, char** argv) {
 
-	if(argc < 3) {
-		std::cout << "usage: a.out PARTY(1/2) PORT #ITERATION #BRANCH" << std::endl;
+	if(argc < 6) {
+		std::cout << "usage: a.out PARTY(1/2) PORT ADDR #ITERATION #BRANCH" << std::endl;
 		return -1;
 	}	
 	
 	parse_party_and_port(argv, &party, &port);
 	BoolIO<NetIO>* ios[threads];
 	for(int i = 0; i < threads; ++i)
-		ios[i] = new BoolIO<NetIO>(new NetIO(party == ALICE?nullptr:"127.0.0.1",port+i), party==ALICE);
+		ios[i] = new BoolIO<NetIO>(new NetIO(party == ALICE?nullptr:argv[3],port+i), party==ALICE);
 
 	std::cout << std::endl << "------------ circuit zero-knowledge proof test ------------" << std::endl << std::endl;;
 
@@ -367,8 +367,8 @@ int main(int argc, char** argv) {
 		num = 10;
         branch = 10;
 	} else {
-		num = atoi(argv[3]);
-        branch = atoi(argv[4]);
+		num = atoi(argv[4]);
+        branch = atoi(argv[5]);
 	}
 
 	test_circuit_zk(ios, party, num, branch);
