@@ -29,7 +29,7 @@ You can simply use `sudo bash setup.sh`. Or,
 Install and Build
 =====
 
-You can simply use `sudo bash setup.sh`. Or,
+You can simply use `bash install.sh`. Or,
 
 1. `mkdir build && cd build && cmake ../ && make && cp ../sha256.txt ./`
 
