@@ -24,14 +24,14 @@ You can simply use `sudo bash setup.sh`. Or,
     1. By default it will build for Release. `-DCMAKE_BUILD_TYPE=[Release|Debug]` option is also available.
     2. No sudo? Change [`CMAKE_INSTALL_PREFIX`](https://cmake.org/cmake/help/v2.8.8/cmake.html#variable%3aCMAKE_INSTALL_PREFIX).
 3. `cd ..`
-4. `sudo apt install -y emacs iperf iftop`
+4. `sudo apt install -y emacs iperf iftop clang`
 
 Install and Build
 =====
 
 You can simply use `bash install.sh`. Or,
 
-1. `mkdir build && cd build && cmake ../ && make && cp ../sha256.txt ./`
+1. `mkdir build && cd build && CC=clang CXX=clang++ cmake ../ && make && cp ../sha256.txt ./`
 
 We test above methods already on a vanilla Ubuntu 22.04 machine.
 
