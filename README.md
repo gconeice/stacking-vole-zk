@@ -13,7 +13,7 @@ We also tweak some emp libraries.
 
 The file `sha256.txt` is obtained from https://homes.esat.kuleuven.be/~nsmart/MPC.
 
-Installation EMP libraries
+Set up Environments including EMP libraries
 =====
 
 You can simply use `sudo bash setup.sh`. Or,
@@ -26,8 +26,11 @@ You can simply use `sudo bash setup.sh`. Or,
 3. `cd ..`
 4. `sudo apt install -y emacs iperf iftop`
 
-Build
+Install and Build
 =====
+
+You can simply use `sudo bash setup.sh`. Or,
+
 1. `mkdir build && cd build && cmake ../ && make && cp ../sha256.txt ./`
 
 We test above methods already on a vanilla Ubuntu 22.04 machine.
