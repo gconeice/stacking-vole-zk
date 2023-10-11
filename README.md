@@ -15,6 +15,9 @@ The file `sha256.txt` is obtained from https://homes.esat.kuleuven.be/~nsmart/MP
 
 Installation EMP libraries
 =====
+
+You can simply use `sudo bash setup.sh`. Or,
+
 1. `wget https://raw.githubusercontent.com/emp-toolkit/emp-readme/master/scripts/install.py`
 2. `python[3] install.py --deps --tool --ot --zk`
     1. By default it will build for Release. `-DCMAKE_BUILD_TYPE=[Release|Debug]` option is also available.
@@ -22,8 +25,11 @@ Installation EMP libraries
 
 Build
 =====
+0. `sudo apt install -y emacs iperf iftop`
 1. `mkdir build && cd build && cmake ../ && make`
 2. `cd build && cp ../sha256.txt ./`
+
+We test above methods already on a vanilla Ubuntu 22.04 machine.
 
 Test
 =====
@@ -52,3 +58,30 @@ We have the following tests:
    1. arith_stack_multi_single_disj_matmul: Arithmetic matrix multiplications, repeating single disjunction, Lemma 5.4 version.
    2. arith_stack_multi_single_disj_matmul_RO: Arithmetic matrix multiplications, repeating single disjunction, RO version.
 
+# How to Simulate Network Setting
+
+**We use `tc` command to simulate the network setting.**
+
+     DEV=lo
+     
+     sudo tc qdisc del dev $DEV root
+     
+     sudo tc qdisc add dev $DEV root handle 1: tbf rate 1Gbit burst 100000 limit 10000
+     
+     sudo tc qdisc add dev $DEV parent 1:1 handle 10: netem delay 2msec
+
+Change DEV to the network card you need (e.g., ens5).
+Note that `sudo tc qdisc del dev $DEV root` needs to be executed before resetting the network.
+It is used to clean the tc setting.
+
+Both P and V need to restrict the network, note that for 30ms latency, both parties should be set to `delay 15msec`.
+
+**You can use `iperf` to test the network throughput. Namely:**
+
+P: `iperf -s`
+
+V: `iperf -c [ip addr]`
+
+**You can use `ping` to test the network latency. Namely:**
+
+V: `ping [ip addr]`
