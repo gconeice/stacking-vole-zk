@@ -217,6 +217,12 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
 }
 
 int main(int argc, char** argv) {
+
+	if(argc < 6) {
+		std::cout << "usage: a.out PARTY(1/2) PORT ADDR DIMENSION #BRANCH" << std::endl;
+		return -1;
+	}	
+	
 	parse_party_and_port(argv, &party, &port);
 	BoolIO<NetIO>* ios[threads];
 	for(int i = 0; i < threads; ++i)
