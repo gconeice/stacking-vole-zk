@@ -102,3 +102,9 @@ V: `iperf -c [ip addr]`
 **You can use `ping` to test the network latency. Namely:**
 
 V: `ping [ip addr]`
+
+**How to test the Comm. in the paper?**
+
+We tested it using linux command `iftop` e.g., on the P's machine, execute:
+
+   iftop -i ens5 -f 'port 12345'
