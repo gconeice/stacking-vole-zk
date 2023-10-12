@@ -13,10 +13,10 @@ We also tweak some emp libraries.
 
 The file `sha256.txt` is obtained from https://homes.esat.kuleuven.be/~nsmart/MPC.
 
-Set up Environments including EMP libraries
+Set up Environments Including EMP Libraries
 =====
 
-You can simply use `sudo bash setup.sh`. Or,
+You can simply use `sudo bash setup.sh`. Or (step-by-step),
 
 0. `mkdir setup && cd setup`
 1. `wget https://raw.githubusercontent.com/emp-toolkit/emp-readme/master/scripts/install.py`
@@ -33,7 +33,7 @@ You can simply use `bash install.sh`. Or,
 
 1. `mkdir build && cd build && CC=clang CXX=clang++ cmake ../ && make && cp ../sha256.txt ./`
 
-We test above methods already on a vanilla Ubuntu 22.04 machine.
+We tested above methods already on a vanilla Ubuntu 22.04 machine.
 
 Test
 =====
@@ -62,6 +62,19 @@ We have the following tests:
    1. arith_stack_multi_single_disj_matmul: Arithmetic matrix multiplications, repeating single disjunction, Lemma 5.4 version.
    2. arith_stack_multi_single_disj_matmul_RO: Arithmetic matrix multiplications, repeating single disjunction, RO version.
 
+**Note that** the auto script will help you compile executable files (under `build/bin/`):
+   1. test_bool_stack_mat_mul_RO
+   2. test_bool_stack_sha256_RO
+   3. test_arith_stack_single_disj_matmul
+   4. test_arith_unstack_single_disj_matmul
+   5. test_arith_stack_batched_matmul_v1
+   6. test_arith_unstack_batched_disj_matmul
+   7. test_arith_stack_multi_single_disj_matmul
+
+
+To obtain other executable files, please modify the file `test/CMakeLists.txt`.
+       
+
 # How to Simulate Network Setting
 
 **We use `tc` command to simulate the network setting.**
@@ -76,7 +89,7 @@ We have the following tests:
 
 Change DEV to the network card you need (e.g., ens5).
 Note that `sudo tc qdisc del dev $DEV root` needs to be executed before resetting the network.
-It is used to clean the tc setting.
+It is used to clean the `tc` setting.
 
 Both P and V need to restrict the network, note that for 30ms latency, both parties should be set to `delay 15msec`.
 
