@@ -133,7 +133,7 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
             left_v[bid*w_length + i] = IntFp(left_vec_a[i], ALICE);
 
     std::cout << "Committed left compressed a!" << std::endl;
-	auto ttt2 = time_from(start)-ttt1;
+	auto ttt2 = time_from(start)-ttt1-ttt0;
     cout << ttt2 << " us\t" << party << " " << endl;
 	std::cout << std::endl;            
     
@@ -229,7 +229,7 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
     }
 
     std::cout << "ACCEPT Inner-Product Proofs" << std::endl;
-	auto ttt3 = time_from(start)-ttt2;
+	auto ttt3 = time_from(start)-ttt2-ttt1-ttt0;
     cout << ttt3 << " us\t" << party << " " << endl;
 	std::cout << std::endl;
 
@@ -282,7 +282,7 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
     }
     batch_reveal_check(f_mac, res, batch_sz);
     std::cout << "ACCEPT Mac Proofs" << std::endl;
-	auto ttt4 = time_from(start)-ttt3;
+	auto ttt4 = time_from(start)-ttt3-ttt2-ttt1-ttt0;
     cout << ttt4 << " us\t" << party << " " << endl;
 	std::cout << std::endl;    
 
