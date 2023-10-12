@@ -60,7 +60,7 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
 
     // debug information
     std::cout << "ACCEPT Multiplication Proofs!" << std::endl;
-    cout << time_from(start) << " us\t" << party << " " << endl;
+    cout << double ttt0=time_from(start) << " us\t" << party << " " << endl;
 	std::cout << std::endl;    
 
 	// Unit for constant offsets
@@ -121,7 +121,7 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
     }
 
     std::cout << "Calculated Left Vectors!" << std::endl;    
-    cout << time_from(start) << " us\t" << party << " " << endl;
+    cout << double ttt1 = time_from(start)-ttt0 << " us\t" << party << " " << endl;
 	std::cout << std::endl;
 
     // Alice chooses active left vector to prove inner_product
@@ -131,7 +131,7 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
             left_v[bid*w_length + i] = IntFp(left_vec_a[i], ALICE);
 
     std::cout << "Committed left compressed a!" << std::endl;    
-    cout << time_from(start) << " us\t" << party << " " << endl;
+    cout << double ttt2 = time_from(start)-ttt1 << " us\t" << party << " " << endl;
 	std::cout << std::endl;            
     
     // Alice proves the inner products are 0
@@ -226,7 +226,7 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
     }
 
     std::cout << "ACCEPT Inner-Product Proofs" << std::endl;    
-    cout << time_from(start) << " us\t" << party << " " << endl;
+    cout << double ttt3 = time_from(start)-ttt2 << " us\t" << party << " " << endl;
 	std::cout << std::endl;
 
     // Generates MACs
@@ -252,9 +252,9 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
         for (int i = 0; i < w_length; i++) mac[bid] = add_mod(mac[bid], mult_mod(right_s[i], left_vec_a[bid*w_length + i]));
     }
 
-    std::cout << "mac Generated" << std::endl;    
-    cout << time_from(start) << " us\t" << party << " " << endl;
-	std::cout << std::endl;
+    // std::cout << "mac Generated" << std::endl;    
+    // cout << time_from(start) << " us\t" << party << " " << endl;
+	// std::cout << std::endl;
 
     // Generates [MAC]s
     IntFp *MAC = new IntFp[batch_sz];
@@ -263,9 +263,9 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
         for (int i = 0; i < w_length; i++) MAC[bid] = MAC[bid] + left_v[bid*w_length + i] * right_s[i];
     }
 
-    std::cout << "[mac] Generated" << std::endl;    
-    cout << time_from(start) << " us\t" << party << " " << endl;
-	std::cout << std::endl;
+    // std::cout << "[mac] Generated" << std::endl;    
+    // cout << time_from(start) << " us\t" << party << " " << endl;
+	// std::cout << std::endl;
 
     // f([MAC])=0 Proofs
     IntFp *f_mac = new IntFp[batch_sz];
@@ -278,11 +278,12 @@ void test_circuit_zk(BoolIO<NetIO> *ios[threads], int party, int matrix_sz, int 
     }
     batch_reveal_check(f_mac, res, batch_sz);
     std::cout << "ACCEPT Mac Proofs" << std::endl;    
-    cout << time_from(start) << " us\t" << party << " " << endl;
+    cout << double ttt4 = time_from(start)-ttt3 << " us\t" << party << " " << endl;
 	std::cout << std::endl;    
 
 	finalize_zk_arith<BoolIO<NetIO>>();
 	auto timeuse = time_from(start);	
+    std::cout << "Total:" << std::endl;    
 	cout << matrix_sz << "\t" << timeuse << " us\t" << party << " " << endl;
 	std::cout << std::endl;
 
